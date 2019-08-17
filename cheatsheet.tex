@@ -1,0 +1,823 @@
+\documentclass[4pt,landscape]{article}
+\usepackage{fontspec}
+\setmainfont[
+	Path = fonts/,
+	BoldFont={BellCentennialStd-bdlisting.otf},
+	ItalicFont={BELLI.TTF},
+	SizeFeatures={
+		{Size=4}
+	}
+]{BellCentennialStd-SubCapt.otf}
+\DeclareMathSizes{4}{4}{4}{4}
+\usepackage{multicol}
+\usepackage{soul}
+\usepackage{xcolor}
+\usepackage{calc}
+\usepackage{ifthen}
+\usepackage[landscape]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb}
+\usepackage{color,graphicx,overpic}
+\usepackage{hyperref}
+\usepackage{eso-pic, rotating, graphicx}
+\usepackage{multirow}
+
+\linespread{0.5}
+
+\everymath=\expandafter{\the\everymath}
+
+\geometry{top=.5in,left=.5in,right=.5in,bottom=.5in}
+
+% Turn off header and footer
+\pagestyle{empty}
+
+% Don't print section numbers
+\setcounter{secnumdepth}{0}
+
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt plus 0.5ex}
+
+%My Environments
+\newtheorem{example}[section]{Example}
+% -----------------------------------------------------------------------
+
+\begin{document}
+\begin{multicols*}{4}
+
+
+% multicol parameters
+% These lengths are set only within the two main columns
+%\setlength{\columnseprule}{0.25pt}
+\setlength{\premulticols}{1pt}
+\setlength{\postmulticols}{1pt}
+\setlength{\multicolsep}{1pt}
+\setlength{\columnsep}{2pt}
+
+\AddToShipoutPicture*{\put(30,545){\rotatebox{90}{\tiny {\color{black} Linear Predictors}}}}
+{\tiny \underline{Feature vector} - The feature vector of an input  $x$ is noted $\phi(x)$ and is such that: \tiny${\phi(x)=\left[\begin{array}{c}\phi_1(x)\hdots\phi_d(x)\end{array}\right]\in\mathbb{R}^d}$}\\
+{\tiny \underline{Score} - The score $s(x,w)$ of an example $(\phi(x),y) \in \mathbb{R}^d \times \mathbb{R}$ associated to a linear model of weights $w \in \mathbb{R}^d$ is given by the inner product: $s(x,w)=w\cdot\phi(x)$}
+
+\AddToShipoutPicture*{\put(30,522){\rotatebox{90}{\tiny {\color{black} Classifier}}}}
+{\color{black}\hrulefill}\\
+{\tiny \underline{Linear classifier} - Given a weight vector $w\in\mathbb{R}^d$ and a feature vector $\phi(x)\in\mathbb{R}^d$, the binary linear classifier $f_w$ is given by:$f_w(x)=\textrm{sign}(s(x,w))$}\par
+{\tiny \underline{Margin} - The margin $m(x,y,w) \in \mathbb{R}$ of an example $(\phi(x),y) \in \mathbb{R}^d \times \{-1,+1\}$ associated to a linear model of weights $w\in \mathbb{R}^d$ quantifies the confidence of the Prediction: larger values are better. It is given by: $m(x,y,w)=s(x,w)\times y$}\par
+
+\AddToShipoutPicture*{\put(30,475){\rotatebox{90}{\scalebox{1}{\tiny {\color{black} Regression}}}}}
+{\color{black}\hrulefill}\\
+{\tiny \underline{Linear regression} - Given a weight vector $w\in\mathbb{R}^d$ and a feature vector $\phi(x)\in\mathbb{R}^d$, the output of a linear regression of weights $w$ denoted as $f_w$ is given by:$f_w(x)=s(x,w)$}\par
+
+{\tiny \underline{Residual} - The residual $\textrm{res}(x,y,w) \in \mathbb{R}$ is defined as being the amount by which the Prediction $f_w(x)$ overshoots the target $y$: $\textrm{res}(x,y,w)=f_w(x)-y$}\par
+
+\AddToShipoutPicture*{\put(30,435){\rotatebox{90}{\scalebox{1}{\tiny {\color{black} Loss Minimization}}}}}
+{\color{black}\hrulefill}\\
+{\tiny \underline{Loss function} - A loss function $\textrm{Loss}(x,y,w)$ quantifies how unhappy we are with the weights $w$ of the model in the Prediction task of output $y$ from input $x$. It is a quantity we want to minimize during the training process.}
+
+{\tiny \underline{Classification case} - The classification of a sample $x$ of true label $y\in \{-1,+1\}$ with a linear model of weights $w$ can be done with the Predictor $f_w(x) \triangleq \textrm{sign}(s(x,w))$. In this situation, a metric of interest quantifying the quality of the classification is given by the margin $m(x,y,w)$, and can be used with the following loss functions:}\par
+\begin{tabular}{c | c }
+\hline
+Zero-one loss &\tiny$ 1_{\{m(x,y,w) \leqslant 0\}}$\\
+Hinge loss & \tiny$ \max(1-m(x,y,w), 0)$\\
+Logistic loss&\tiny$ \log(1+e^{-m(x,y,w)})$\\
+Squared loss&\tiny$ (\textrm{res}(x,y,w))^2$\\
+Absolute deviation loss&\tiny$ |\textrm{res}(x,y,w)|$
+	
+\end{tabular}
+
+{\underline{Regression case} - \tiny The Prediction of a sample $x$ of true label $y \in \mathbb{R}$ with a linear model of weights $w$ can be done with the Predictor $f_w(x) \triangleq s(x,w)$. In this situation, a metric of interest quantifying the quality of the regression is given by the margin $\textrm{res}(x,y,w)$ and can be used with the following loss functions:}\par
+
+{\underline{Loss minimization framework} - In order to train a model, we want to minimize the training loss is defined as follows: \tiny${\textrm{TrainLoss}(w)=\frac{1}{|\mathcal{D}_{\textrm{train}}|}\sum_{(x,y)\in\mathcal{D}_{\textrm{train}}}\textrm{Loss}(x,y,w)}$}
+
+\AddToShipoutPicture*{\put(30,305){\rotatebox{90}{\scalebox{1}{\tiny {\color{black} Non-linear Predictors}}}}}
+{\color{black}\hrulefill}\\
+{\tiny \underline{$k$-nearest neighbors} - The $k$-nearest neighbors algorithm, commonly known as $k$-NN, is a non-parametric approach where the response of a data point is determined by the nature of its $k$ neighbors from the training set. It can be used in both classification and regression settings.}\par
+
+{\tiny \textit{Remark: the higher the parameter $k$, the higher the bias, and the lower the parameter $k$, the higher the variance.}}\par
+
+{\tiny By noting $i$ the $i^{th}$ layer of the network and $j$ the $j^{th}$ hidden unit of the layer, we have:}\par
+\tiny ${z_j^{[i]}={w_j^{[i]}}^Tx+b_j^{[i]}}$
+
+{where we note $w$, $b$, $x$, $z$ the weight, bias, input and non-activated output of the neuron respectively.}\par
+
+\AddToShipoutPicture*{\put(30,232){\rotatebox{90}{\scalebox{1}{\tiny {\color{black} Stochastic Gradient Descent}}}}}
+{\color{black}\hrulefill}\\
+{\underline{Gradient descent} - By noting $\eta\in\mathbb{R}$ the learning rate (also called step size), the update rule for gradient descent is expressed with the learning rate and the loss function $\textrm{Loss}(x,y,w)$ as follows:}\par
+
+\tiny${w\longleftarrow w-\eta\nabla_w \textrm{Loss}(x,y,w)}$
+
+{\underline{Stochastic updates} - Stochastic gradient descent (SGD) updates the parameters of the model one training example \tiny $(\phi(x),y)\in\mathcal{D}_{\textrm{train}}$ at a time. This method leads to sometimes noisy, but fast updates.}\par
+
+{\underline{Batch updates} - Batch gradient descent (BGD) updates the parameters of the model one batch of examples (e.g. the entire training set) at a time. This method computes stable update directions, at a greater computational cost.}\par
+
+\underline{Fine-tuning models}
+{\tiny Hypothesis class - A hypothesis class $\mathcal{F}$ is the set of possible Predictors with a fixed $\phi(x)$ and varying $w$: $\mathcal{F}=\left\{f_w:w\in\mathbb{R}^d\right\}$}\par
+
+
+{Logistic function - The logistic function \tiny $\sigma$, also called the sigmoid function, is defined as:}\par
+
+{\tiny ${\forall z\in(-\infty,+\infty),\quad\sigma(z)=\frac{1}{1+e^{-z}}}$}
+
+{Remark: we have \tiny $\sigma'(z)=\sigma(z)(1-\sigma(z))$.}\par
+
+{\underline{Backpropagation} - The forward pass is done through $f_i$, which is the value for the subexpression rooted at $i$, while the backward pass is done through \tiny $ g_i={\partial\textrm{out}} / {\partial f_i}$ and represents how $f_i$ influences the output.}\par
+
+{\underline{Approximation and estimation error} - The approximation error $\epsilon_\text{approx}$ represents how far the entire hypothesis class \tiny $\mathcal{F}$ is from the target Predictor $g^\star$, while the estimation error $\epsilon_{\text{est}}$ quantifies how good the Predictor $\hat{f}$ is with respect to the best Predictor $f^{*}$ of the hypothesis class $\mathcal{F}$.}\par
+
+{\underline{Regularization} - The regularization procedure aims at avoiding the model to overfit the data and thus deals with high variance issues. The following table sums up the different types of commonly used regularization techniques:}\par
+
+%\begin{tabular}{c | c}
+%Lasso & $...+\lambda||w||_1$\\&$\lambda\in\mathbb{R}$\\
+%\hline
+%Ridge & $...+\lambda||w||_2^2$\\&$\lambda\in\mathbb{R}$\\
+%\hline
+%Elastic Net & $...+\lambda\Big[(1-\alpha)||w||_1+\alpha||w||_2^2\Big]$\\&$\lambda\in\mathbb{R},\alpha\in[0,1]$\\
+%\end{tabular}
+
+{\underline{Hyperparameters} - Hyperparameters are the properties of the learning algorithm, and include features, regularization parameter $\lambda$, number of iterations $T$, step size $\eta$, etc.}\par
+
+\AddToShipoutPicture*{\put(30,90){\rotatebox{90}{\scalebox{1}{\tiny {\color{black} Unsupervised Learning}}}}}
+{\color{black}\hrulefill}\\
+{\tiny \underline{$k$-means Clustering} - Given a training set of input points $\mathcal{D}_{\textrm{train}}$, the goal of a clustering algorithm is to assign each point $\phi(x_i)$ to a cluster $z_i\in\{1,...,k\}$.}\par
+
+{\tiny \underline{Objective function} - The loss function for one of the main clustering algorithms, $k$-means, is given by:}\par
+
+\tiny$ {\textrm{Loss}_{\textrm{k-means}}(x,\mu)=\sum_{i=1}^n||\phi(x_i)-\mu_{z_i}||^2}$
+
+{\tiny \underline{Algorithm} - After randomly initializing the cluster centroids\\ {\tiny$ \mu_1,\mu_2,...,\mu_k\in\mathbb{R}^n$}, the $k$-means algorithm repeats the following step until convergence:}
+\tiny ${z_i=\underset{j}{\textrm{arg min}}||\phi(x_i)-\mu_j||^2} \text{and } {\mu_j=\frac{\sum_{i=1}^m1_{\{z_i=j\}}\phi(x_i)}{\sum_{i=1}^m1_{\{z_i=j\}}}}$
+
+%\underline{Principal Component Analysis}
+%{Eigenvalue, eigenvector - Given a matrix $A\in\mathbb{R}^{n\times n}$, $\lambda$ is said to be an eigenvalue of $A$ if there exists a vector $z\in\mathbb{R}^n\backslash\{0\}$, called eigenvector, such that we have:}\par
+
+%$\tiny {Az=\lambda z}$
+
+%{Spectral theorem - Let $A\in\mathbb{R}^{n\times n}$. If $A$ is symmetric, then $A$ is diagonalizable by a real orthogonal matrix $U\in\mathbb{R}^{n\times n}$. By noting $\Lambda=\textrm{diag}(\lambda_1,...,\lambda_n)$, we have:}\par
+
+%$\tiny {\exists\Lambda\textrm{ diagonal},\quad A=U\Lambda U^T}$
+
+%{\textit{Remark: the eigenvector associated with the largest eigenvalue is called principal eigenvector of matrix $A$.}}\par
+
+%{\underline{Algorithm} - The Principal Component Analysis (PCA) procedure is a dimension reduction technique that projects the data on $k$ dimensions by maximizing the variance of the data as follows:}\par
+%\begin{itemize}
+%\item Normalize the data to have a mean of 0 and standard deviation of 1.
+
+%$\tiny {\phi_j(x_i)\leftarrow\frac{\phi_j(x_i)-\mu_j}{\sigma_j}}\quad\mbox{where}\quad{\mu_j = \frac{1}{m}\sum_{i=1}^m\phi_j(x_i)}$
+%$\tiny {\sigma_j^2=\frac{1}{m}\sum_{i=1}^m(\phi_j(x_i)-\mu_j)^2}$
+
+%\item Compute $\Sigma=\frac{1}{m}\sum_{i=1}^m\phi(x_i){\phi(x_i)}^T\in\mathbb{R}^{n\times n}$, which is symmetric with real eigenvalues.
+%\item Compute $u_1, ..., u_k\in\mathbb{R}^n$ the $k$ orthogonal principal eigenvectors of $\Sigma$, i.e. the orthogonal eigenvectors of the $k$ largest eigenvalues.
+%\item Project the data on $\textrm{span}_\mathbb{R}(u_1,...,u_k)$.\par
+%{This procedure maximizes the variance among all $k$-dimensional spaces.}\par
+%\end{itemize}
+
+%\vfill\null
+%\columnbreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\vfill\null
+%\columnbreak
+{\color{cyan}\hrulefill}\\
+\AddToShipoutPicture*{\put(30,35){\rotatebox{90}{\scalebox{1}{\tiny {\color{cyan} Search Optimization}}}}}
+\underline{Tree search}
+{This category of states-based algorithms explores all possible states and actions. It is quite memory efficient, and is suitable for huge state spaces but the runtime can become exponential in the worst cases.}\par
+
+{\tiny \underline{Search problem} - A search problem is defined with: (a) a starting state $s_{\textrm{start}}$, (b) possible actions $\textrm{Actions}(s)$ from state $s$, (c) action cost $\textrm{Cost}(s,a)$ from state $s$ with action $a$, (d) successor $\textrm{Succ}(s,a)$ of state $s$ after action $a$, (e) whether an end state was reached $\textrm{IsEnd}(s)$
+}\par
+
+{The objective is to find a path that minimizes the cost.}\par
+\columnbreak
+
+%{\underline{Backtracking search} - Backtracking search is a naive recursive algorithm that tries all possibilities to find the minimum cost path. Here, action costs can be either positive or negative.}\par
+
+%{\tiny \underline{Breadth-first search (BFS)} - Breadth-first search is a graph search algorithm that does a level-by-level traversal. We can implement it iteratively with the help of a queue that stores at each step future nodes to be visited. For this algorithm, we can assume action costs to be equal to a constant $c\geqslant0$.}\par
+
+%{\tiny \underline{Depth-first search (DFS)} - Depth-first search is a search algorithm that traverses a graph by following each path as deep as it can. We can implement it recursively, or iteratively with the help of a stack that stores at each step future nodes to be visited. For this algorithm, action costs are assumed to be equal to 0.}\par
+
+%{\underline{Iterative deepening} - \tiny The iterative deepening trick is a modification of the depth-first search algorithm so that it stops after reaching a certain depth, which guarantees optimality when all action costs are equal. Here, we assume that action costs are equal to a constant $c\geqslant0$.}\par
+
+%{\tiny \underline{Tree search algorithms summary} - By noting $b$ the number of actions per state, $d$ the solution depth, and $D$ the maximum depth, we have:}\par
+
+\begin{tabular}{c | c | c | c | c} \tiny 
+Algorithm & BS & BFS & DFS & DFS-ID\\
+\hline\\
+Action costs & any & $c\geqslant0$ & 0 & $c\ge0$\\
+Space & $\mathcal{O}(D)$ & $\mathcal{O}(b^d)$ & $\mathcal{O}(D)$ & $\mathcal{O}(d)$  \\
+Time & $\mathcal{O}(b^D)$ & $\mathcal{O}(b^d)$ & $\mathcal{O}(b^D)$ & $\mathcal{O}(b^d)$
+\end{tabular}
+
+\AddToShipoutPicture*{\put(215,550){\rotatebox{90}{\scalebox{1}{\tiny {\color{cyan} Graph Search}}}}}
+{\tiny \underline{Graph} - A graph is comprised of a set of vertices $V$ (also called nodes) as well as a set of edges $E$ (also called links).}\par
+{\textit{Remark: a graph is said to be acylic when there is no cycle.}}\par
+
+{\underline{State} - A state is a summary of all past actions sufficient to choose future actions optimally.}\par
+
+{\underline{Dynamic programming} - Dynamic programming (DP) is a backtracking search algorithm with memoization (i.e. partial results are saved) whose goal is to find a minimum cost path from state $s$ to an end state $s_\textrm{end}$. It can potentially have exponential savings compared to traditional graph search algorithms, and has the property to only work for acyclic graphs. For any given state $s$, the future cost is computed as follows:}\par
+
+\tiny ${\textrm{FutureCost}(s)=\left\{\begin{array}{lc}0 \quad \textrm{if IsEnd}(s)\\\underset{a\in\textrm{Actions}(s)}{\textrm{min}}\big[\textrm{Cost}(s,a)+\textrm{FutureCost(Succ}(s,a))\big] \quad \textrm{otherwise}\end{array}\right.}$
+
+{\underline{Uniform cost search} - Uniform cost search (UCS) is a search algorithm that aims at finding the shortest path from a state $s_\textrm{start}$ to an end state $s_\textrm{end}$. It explores states $s$ in increasing order of $\textrm{PastCost}(s)$ and relies on the fact that all action costs are non-negative.}\par
+
+{\textit{Remark 1: the UCS algorithm is logically equivalent to Djikstra's algorithm.}}\par
+{\textit{Remark 2: the algorithm would not work for a problem with negative action costs, and adding a positive constant to make them non-negative would not solve the problem since this would end up being a different problem.}}\par
+
+{\underline{Correctness theorem} - When a state $s$ is popped from the frontier $\mathcal{F}$ and moved to explored set $\mathcal{E}$, its priority is equal to $\textrm{PastCost}(s)$ which is the minimum cost path from $s_\textrm{start}$ to $s$.}\par
+
+{\underline{Graph search algorithms summary} - By noting $N$ the number of total states, $n$ of which are explored before the end state $s_\textrm{end}$, we have:}\par
+
+%<td align=center>\underline{Algorithm}</td>
+%<td align=center>\underline{Acyclicity}</td>
+%<td align=center>\underline{Costs}</td>
+%<td align=center>\underline{Time/space}</td>
+
+%<td align=center valign=top>Dynamic programming</td>
+%<td align=center valign=top>yes</td>
+%<td align=center valign=top>any</td>
+%<td align=center valign=top>$\mathcal{O}(N)$</td>
+%<td align=center valign=top>Uniform cost search</td>
+%<td align=center valign=top>no</td>
+%<td align=center valign=top>$c\geqslant0$</td>
+%<td align=center valign=top>$\mathcal{O}(n\log(n))$</td>
+
+
+{\tiny \textit{Remark: the complexity countdown supposes the number of possible actions per state to be constant.}}\par
+
+{\color{cyan} \hrulefill}\\
+\AddToShipoutPicture*{\put(215,395){\rotatebox{90}{\scalebox{1}{\tiny {\color{cyan} Learning costs}}}}}
+{Suppose we are not given the values of $\textrm{Cost}(s,a)$, we want to estimate these quantities from a training set of minimizing-cost-path sequence of actions $(a_1, a_2, ..., a_k)$.}\par
+{\underline{Structured perceptron} - The structured perceptron is an algorithm aiming at iteratively learning the cost of each state-action pair. At each step, it:\\
+(1) decreases the estimated cost of each state-action of the true minimizing path $y$ given by the training data,
+(2) increases the estimated cost of each state-action of the current Predicted path $y'$ inferred from the learned weights.}\par
+{\textit{Remark: there are several versions of the algorithm, one of which simplifies the problem to only learning the cost of each action $a$, and the other parametrizes $\textrm{Cost}(s,a)$ to a feature vector of learnable weights.}}\par
+
+{\underline{$\textrm{A}^{\star}$ search - Heuristic function} - A heuristic is a function $h$ over states $s$, where each $h(s)$ aims at estimating $\textrm{FutureCost}(s)$, the cost of the path from $s$ to $s_\textrm{end}$.}\par
+
+{\underline{Algorithm} - $\textrm{A}^{*}$ is a search algorithm that aims at finding the shortest path from a state $s$ to an end state $s_\textrm{end}$. It explores states $s$ in increasing order of $\textrm{PastCost}(s) + h(s)$. It is equivalent to a uniform cost search with edge costs $\textrm{Cost}'(s,a)$ given by:}\par
+
+${\textrm{Cost}'(s,a)=\textrm{Cost}(s,a)+h(\textrm{Succ}(s,a))-h(s)}$
+
+{\textit{Remark: this algorithm can be seen as a biased version of UCS exploring states estimated to be closer to the end state.}}\par
+
+{\underline{Consistency} - A heuristic $h$ is said to be consistent if it satisfies the two following properties:
+(1) \tiny For all states $s$ and actions $a$, ${h(s) \leqslant \textrm{Cost}(s,a)+h(\textrm{Succ}(s,a))}$
+(2) \tiny The end state verifies the following: ${h(s_{\textrm{end}})=0}$}\par
+
+{\underline{Correctness} - If $h$ is consistent, then $\textrm{A}^\star$ returns the minimum cost path.}\par
+
+{\underline{Admissibility} - A heuristic $h$ is said to be admissible if we have:${h(s)\leqslant\textrm{FutureCost}(s)}$}\par
+
+{\underline{Theorem} - Let $h(s)$ be a given heuristic. We have: ${h(s)\textrm{ consistent}\Longrightarrow h(s)\textrm{ admissible}}$}\\
+
+{\tiny \underline{Efficiency}: $\textrm{A}^\star$ explores all states $s$ satisfying the following equation: ${\textrm{PastCost}(s)\leqslant\textrm{PastCost}(s_{\textrm{end}})-h(s)}$}\par
+
+{\textit{Remark: larger values of $h(s)$ is better as this equation shows it will restrict the set of states $s$ going to be explored.}}\par
+
+{\color{cyan} \hrulefill}\\
+\AddToShipoutPicture*{\put(215,230){\rotatebox{90}{\scalebox{1}{\tiny {\color{cyan} Relaxation}}}}}
+{It is a framework for producing consistent heuristics. The idea is to find closed-form reduced costs by removing constraints and use them as heuristics.}\par
+
+{\underline{Relaxed search problem} - The relaxation of search problem $P$ with costs $\textrm{Cost}$ is noted $P_{\textrm{rel}}$ with costs $\textrm{Cost}_{\textrm{rel}}$, and satisfies the identity:}\par
+
+${\textrm{Cost}_{\textrm{rel}}(s,a)\leqslant\textrm{Cost}(s,a)}$
+
+
+{\underline{Relaxed heuristic} - Given a relaxed search problem $P_{\textrm{rel}}$, we define the relaxed heuristic $h(s)=\textrm{FutureCost}_{\textrm{rel}}(s)$ as the minimum cost path from $s$ to an end state in the graph of costs $\textrm{Cost}_{\textrm{rel}}(s,a)$.}\par
+
+{\underline{Consistency of relaxed heuristics} - Let $P_{\textrm{rel}}$ be a given relaxed problem. By theorem, we have:}\par
+
+${h(s)=\textrm{FutureCost}_{\textrm{rel}}(s)\Longrightarrow h(s)\textrm{ consistent}}$
+
+
+{\underline{Tradeoff when choosing heuristic} - We have to balance two aspects in choosing a heuristic:
+(1) Computational efficiency: $h(s)=\textrm{FutureCost}_{\textrm{rel}}(s)$ must be easy to compute. It has to produce a closed form, easier search and independent subproblems.
+(2) Good enough approximation: the heuristic $h(s)$ should be close to $\textrm{FutureCost}(s)$ and we have thus to not remove too many constraints.}\par
+
+{\underline{Max heuristic} - Let \tiny $h_1(s)$, $h_2(s)$ be two heuristics. We have the following property:}\par
+
+${h_1(s),\textrm{ }h_2(s)\textrm{ consistent}\Longrightarrow h(s)=\max\{h_1(s),\textrm{ }h_2(s)\}\textrm{ consistent}}$
+
+
+{\color{cyan} \hrulefill}\\
+\AddToShipoutPicture*{\put(215,120){\rotatebox{90}{\scalebox{1}{\tiny {\color{cyan} Markov Decision Process}}}}}
+\underline{Notations}
+{\underline{Definition} - The objective of a Markov decision process is to maximize rewards. It is defined with: (a) a starting state $s_{\textrm{start}}$, (b) possible actions $\textrm{Actions}(s)$ from state $s$, (c) transition probabilities $T(s,a,s')$ from $s$ to $s'$ with action $a$, (d) rewards $\textrm{Reward}(s,a,s')$ from $s$ to $s'$ with action $a$, (e) whether an end state was reached $\textrm{IsEnd}(s)$, (f) a discount factor $0\leqslant\gamma\leqslant1$
+}\par
+
+
+{\underline{Transition probabilities} - The transition probability $T(s,a,s')$ specifies the probability of going to state $s'$ after action $a$ is taken in state $s$. Each $s' \mapsto T(s,a,s')$ is a probability distribution, which means that:}\par
+
+$\forall s,a,\quad{\sum_{s'\in\textrm{ States}}T(s,a,s')=1}$
+
+
+{\underline{Policy} - A policy $\pi$ is a function that maps each state $s$ to an action $a$, i.e.${\pi : s \mapsto a}$}\par
+
+
+{\underline{Utility} - The utility of a path $(s_0, ..., s_k)$ is the discounted sum of the rewards on that path. In other words,}\par
+
+${u(s_0,...,s_k)=\sum_{i=1}^{k}r_i\gamma^{i-1}}$
+
+{\underline{Q-value} - The $Q$-value of a policy $\pi$ at state $s$ with action $a$, also noted $Q_{\pi}(s,a)$, is the expected utility from state $s$ after taking action $a$ and then following policy $\pi$. It is defined as follows:}\par
+
+${Q_{\pi}(s,a)=\sum_{s'\in\textrm{ States}}T(s,a,s')\left[\textrm{Reward}(s,a,s')+\gamma V_\pi(s')\right]}$
+
+
+{\underline{Value of a policy} - The value of a policy $\pi$ from state $s$, also noted $V_{\pi}(s)$, is the expected utility by following policy $\pi$ from state $s$ over random paths. It is defined as follows:}\par
+
+${V_\pi(s)=Q_\pi(s,\pi(s))}$
+
+{\textit{Remark: $V_\pi(s)$ is equal to 0 if $s$ is an end state.}}\par
+{\color{cyan} \hrulefill}\\
+\columnbreak
+
+\underline{Policy evaluation} - Given a policy $\pi$, policy evaluation is an iterative algorithm that aims at estimating $V_\pi$. It is done as follows:\\
+
+(1) \underline{Initialization}: for all states $s$, we have ${V_\pi^{(0)}(s)\longleftarrow0}$
+
+(2) \underline{Iteration}: for $t$ from 1 to $T_{\textrm{PE}}$, we have
+
+$\forall s,\quad{V_\pi^{(t)}(s)\longleftarrow Q_\pi^{(t-1)}(s,\pi(s))}$
+
+with
+
+$Q_\pi^{(t-1)}(s,\pi(s))=$\\$\quad\displaystyle\sum_{s'\in\textrm{ States}}T(s,\pi(s),s')\Big[\textrm{Reward}(s,\pi(s),s')+\gamma V_\pi^{(t-1)}(s')\Big]$\par
+{\textit{Remark: by noting $S$ the number of states, $A$ the number of actions per state, $S'$ the number of successors and $T$ the number of iterations, then the time complexity is of $\mathcal{O}(T_{\textrm{PE}}SS')$.}}\par
+
+{\underline{Optimal Q-value} - The optimal $Q$-value $Q_{\textrm{opt}}(s,a)$ of state $s$ with action $a$ is defined to be the maximum $Q$-value attained by any policy starting. It is computed as follows:}\par
+
+${Q_{\textrm{opt}}(s,a)=\sum_{s'\in\textrm{ States}}T(s,a,s')\left[\textrm{Reward}(s,a,s')+\gamma V_\textrm{opt}(s')\right]}$
+
+
+{\underline{Optimal value} - The optimal value $V_{\textrm{opt}}(s)$ of state $s$ is defined as being the maximum value attained by any policy. It is computed as follows:}\par
+
+${V_{\textrm{opt}}(s)=\underset{a\in\textrm{ Actions}(s)}{\textrm{max}}Q_\textrm{opt}(s,a)}$
+
+
+{\underline{Optimal policy} - The optimal policy $\pi_{\textrm{opt}}$ is defined as being the policy that leads to the optimal values. It is defined by:}\par
+
+$\forall s,\quad{\pi_{\textrm{opt}}(s)=\underset{a\in\textrm{ Actions}(s)}{\textrm{argmax}}Q_\textrm{opt}(s,a)}$
+
+
+{\underline{Value iteration} - Value iteration is an algorithm that finds the optimal value $V_{\textrm{opt}}$ as well as the optimal policy $\pi_{\textrm{opt}}$. It is done as follows:
+
+(1) \underline{Initialization}: for all states $s$, we have $V_{\textrm{opt}}^{(0)}(s)\longleftarrow0$
+
+(2) \underline{Iteration}: for $t$ from 1 to $T_{\textrm{VI}}$, we have
+
+$\forall s,\quad{V_\textrm{opt}^{(t)}(s)\longleftarrow \underset{a\in\textrm{ Actions}(s)}{\textrm{max}}Q_\textrm{opt}^{(t-1)}(s,a)}$ with}
+$$\hspace{-0.25cm}Q_\textrm{opt}^{(t-1)}(s,a)=\sum_{s'\in\textrm{ States}}T(s,a,s')\Big[\textrm{Reward}(s,a,s')+\gamma V_\textrm{opt}^{(t-1)}(s')\Big]$$	
+{\textit{Remark: if we have either $\gamma < 1$ or the MDP graph being acyclic, then the value iteration algorithm is guaranteed to converge to the correct answer.}}\par
+
+{\color{cyan} \hrulefill}\\
+\AddToShipoutPicture*{\put(398,259){\rotatebox{90}{\scalebox{1}{\tiny {\color{cyan} When unknown transitions and rewards}}}}}
+{\tiny \underline{Model-based Monte Carlo} - The model-based Monte Carlo method aims at estimating $T(s,a,s')$ and $\textrm{Reward}(s,a,s')$ using Monte Carlo simulation with:
+${\widehat{T}(s,a,s')=\frac{\#\textrm{ times }(s,a,s')\textrm{ occurs}}{\#\textrm{ times }(s,a)\textrm{ occurs}}}$\\
+${\widehat{\textrm{Reward}}(s,a,s')=r\textrm{ in }(s,a,r,s')}$
+
+These estimations will be then used to deduce $Q$-values, including $Q_\pi$ and $Q_\textrm{opt}.$}\par
+{Remark: model-based Monte Carlo is said to be off-policy, because the estimation does not depend on the exact policy.}\par
+
+{\underline{Model-free Monte Carlo} - The model-free Monte Carlo method aims at directly estimating $Q_{\pi}$, as follows:
+${\widehat{Q}_\pi(s,a)=\textrm{average of }u_t\textrm{ where }s_{t-1}=s, a_t=a}$
+
+where $u_t$ denotes the utility starting at step $t$ of a given episode.}\par
+{\textit{Remark: model-free Monte Carlo is said to be on-policy, because the estimated value is dependent on the policy $\pi$ used to generate the data.}}\par
+
+{\tiny \underline{Equivalent formulation} - By introducing the constant $\eta=\frac{1}{1+(\#\textrm{updates to }(s,a))}$ and for each $(s,a,u)$ of the training set, the update rule of model-free Monte Carlo has a convex combination formulation:
+
+${\widehat{Q}_\pi(s,a)\leftarrow(1-\eta)\widehat{Q}_\pi(s,a)+\eta u}$
+
+as well as a stochastic gradient formulation:
+
+${\widehat{Q}_\pi(s,a)\leftarrow\widehat{Q}_\pi(s,a) - \eta (\widehat{Q}_\pi(s,a) - u)}$
+
+}\par
+
+{\tiny \underline{SARSA} - State-action-reward-state-action (SARSA) is a boostrapping method estimating $Q_\pi$ by using both raw data and estimates as part of the update rule. For each $(s,a,r,s',a')$, we have:}\par
+
+${\widehat{Q}_\pi(s,a)\longleftarrow(1-\eta)\widehat{Q}_\pi(s,a)+\eta\Big[r+\gamma\widehat{Q}_\pi(s',a')\Big]}$
+
+{\textit{Remark: the SARSA estimate is updated on the fly as opposed to the model-free Monte Carlo one where the estimate can only be updated at the end of the episode.}}\par
+
+{\tiny \underline{Q-learning} - $Q$-learning is an off-policy algorithm that produces an estimate for $Q_\textrm{opt}$. On each $(s,a,r,s',a')$, we have:}\par
+
+$\widehat{Q}_{\textrm{opt}}(s,a)\leftarrow$\\$(1-\eta)\widehat{Q}_{\textrm{opt}}(s,a)+\eta\Big[r+\gamma\underset{a'\in\textrm{ Actions}(s')}{\textrm{max}}\widehat{Q}_{\textrm{opt}}(s',a')\Big]$
+
+
+{\underline{Epsilon-greedy} - The epsilon-greedy policy is an algorithm that balances exploration with probability $\epsilon$ and exploitation with probability $1-\epsilon$. For a given state $s$, the policy $\pi_{\textrm{act}}$ is computed as follows:}\par
+
+${\pi_\textrm{act}(s)=\left\{\begin{array}{ll}\underset{a\in\textrm{ Actions}}{\textrm{argmax }}\widehat{Q}_\textrm{opt}(s,a) & \textrm{with proba }1-\epsilon\\\textrm{random from Actions}(s) & \textrm{with proba }\epsilon\end{array}\right.}$
+
+{\color{cyan} \hrulefill}\\
+\AddToShipoutPicture*{\put(398,75){\rotatebox{90}{\scalebox{1}{\tiny {\color{cyan} Game Playing}}}}}
+{\underline{Game tree} - A game tree is a tree that describes the possibilities of a game. In particular, each node is a decision point for a player and each root-to-leaf path is a possible outcome of the game.}\par
+
+{\underline{Two-player zero-sum game} - It is a game where each state is fully observed and such that players take turns. It is defined with:
+(1) a starting state $s_{\textrm{start}}$
+(2) possible actions $\textrm{Actions}(s)$ from state $s$
+(3) successors $\textrm{Succ}(s,a)$ from states $s$ with actions $a$
+(4) whether an end state was reached $\textrm{IsEnd}(s)$
+(5) the agent's utility $\textrm{Utility}(s)$ at end state $s$
+(6) the player $\textrm{Player}(s)$ who controls state $s$}\par
+{\textit{Remark: we will assume that the utility of the agent has the opposite sign of the one of the opponent.}}\par
+
+{\underline{Types of policies} - There are two types of policies:
+(1) Deterministic policies, noted $\pi_p(s)$, which are actions that player $p$ takes in state $s$.
+(2) Stochastic policies, noted $\pi_p(s,a)\in[0,1]$, which are probabilities that player $p$ takes action $a$ in state $s$.}\par
+
+\columnbreak
+{\underline{Expectimax} - For a given state $s$, the expectimax value $V_{\textrm{em}}(s)$ is the maximum expected utility of any agent policy when playing with respect to a fixed and known opponent policy $\pi_{\textrm{opp}}$. It is computed as follows:}\par
+
+${V_{\textrm{em}}(s)=\left\{\begin{array}{ll}\textrm{Utility}(s) & \textrm{IsEnd}(s)\\\underset{a\in\textrm{Actions}(s)}{\textrm{max}}V_{\textrm{em}}(\textrm{Succ}(s,a)) & \textrm{Player}(s)=\textrm{agent}\\\displaystyle\sum_{a\in\textrm{Actions}(s)}\pi_{\textrm{opp}}(s,a)V_{\textrm{em}}(\textrm{Succ}(s,a)) & \textrm{Player}(s)=\textrm{opp}\end{array}\right.}$
+
+{\textit{Remark: expectimax is the analog of value iteration for MDPs.}}\par
+
+
+{\underline{Minimax} - The goal of minimax policies is to find an optimal policy against an adversary by assuming the worst case, i.e. that the opponent is doing everything to minimize the agent's utility. It is done as follows:}\par
+
+${V_{\textrm{minimax}}(s)=\left\{\begin{array}{ll}\textrm{Utility}(s) & \textrm{IsEnd}(s)\\\underset{a\in\textrm{Actions}(s)}{\textrm{max}}V_{\textrm{minimax}}(\textrm{Succ}(s,a)) & \textrm{Player}(s)=\textrm{agent}\\\underset{a\in\textrm{Actions}(s)}{\textrm{min}}V_{\textrm{minimax}}(\textrm{Succ}(s,a)) & \textrm{Player}(s)=\textrm{opp}\end{array}\right.}$
+
+{\textit{Remark: we can extract $\pi_{\textrm{max}}$ and $\pi_{\textrm{min}}$ from the minimax value $V_{\textrm{minimax}}$.}}\par
+
+
+{\underline{Minimax properties} - By noting $V$ the value function, there are 3 properties around minimax to have in mind:\\
+\textit{Property 1}: if the agent were to change its policy to any $\pi_{\textrm{agent}}$, then the agent would be no better off.
+
+${\forall \pi_{\textrm{agent}},\quad V(\pi_{\textrm{max}},\pi_{\textrm{min}})\geqslant V(\pi_{\textrm{agent}},\pi_{\textrm{min}})}$\\
+
+\textit{Property 2}: if the opponent changes its policy from $\pi_{\textrm{min}}$ to $\pi_{\textrm{opp}}$, then he will be no better off.\\
+
+${\forall \pi_{\textrm{opp}},\quad V(\pi_{\textrm{max}},\pi_{\textrm{min}})\leqslant V(\pi_{\textrm{max}},\pi_{\textrm{opp}})}$
+
+\textit{Property 3}: if the opponent is known to be not playing the adversarial policy, then the minimax policy might not be optimal for the agent.
+
+${\forall \pi,\quad V(\pi_{\textrm{max}},\pi)\leqslant V(\pi_{\textrm{exptmax}},\pi)}$\\
+
+
+In the end, we have the following relationship:
+
+${V(\pi_{\textrm{exptmax}},\pi_{\textrm{min}})\leqslant V(\pi_{\textrm{max}},\pi_{\textrm{min}})\leqslant V(\pi_{\textrm{max}},\pi)\leqslant V(\pi_{\textrm{exptmax}},\pi)}$
+
+}\par
+
+{\color{cyan} \hrulefill}\\
+\AddToShipoutPicture*{\put(580,380){\rotatebox{90}{\scalebox{1}{\tiny {\color{cyan} Speeding Up Minimax}}}}}
+{\underline{Evaluation function} - An evaluation function is a domain-specific and approximate estimate of the value $V_{\textrm{minimax}}(s)$. It is noted $\textrm{Eval}(s)$.}\par
+{\textit{Remark: $\textrm{FutureCost}(s)$ is an analogy for search problems.}}\par
+
+{\underline{Alpha-beta pruning} - Alpha-beta pruning is a domain-general exact method optimizing the minimax algorithm by avoiding the unnecessary exploration of parts of the game tree. To do so, each player keeps track of the best value they can hope for (stored in $\alpha$ for the maximizing player and in $\beta$ for the minimizing player). At a given step, the condition $\beta < \alpha$ means that the optimal path is not going to be in the current branch as the earlier player had a better option at their disposal.}\par
+
+{\underline{TD learning} - Temporal difference (TD) learning is used when we don't know the transitions/rewards. The value is based on exploration policy. To be able to use it, we need to know rules of the game $\textrm{Succ}(s,a)$. For each $(s,a,r,s')$, the update is done as follows:}\par
+
+${w\longleftarrow w-\eta\big[V(s,w)-(r+\gamma V(s',w))\big]\nabla_wV(s,w)}$
+
+
+\underline{Simultaneous games}
+{This is the contrary of turn-based games, where there is no ordering on the player's moves.}\par
+
+{\underline{Single-move simultaneous game} - Let there be two players $A$ and $B$, with given possible actions. We note $V(a,b)$ to be $A$'s utility if $A$ chooses action $a$, $B$ chooses action $b$. $V$ is called the payoff matrix.}\par
+
+{\underline{Strategies} - There are two main types of strategies:\\
+(1) A pure strategy is a single action: ${a\in\textrm{Actions}}$\\
+
+(2) A mixed strategy is a probability distribution over actions: $\forall a\in\textrm{Actions},\quad{0\leqslant\pi(a)\leqslant1}$}\par
+
+{\underline{Game evaluation} - The value of the game $V(\pi_A,\pi_B)$ when player $A$ follows $\pi_A$ and player $B$ follows $\pi_B$ is such that:}\par
+
+${V(\pi_A,\pi_B)=\sum_{a,b}\pi_A(a)\pi_B(b)V(a,b)}$
+
+
+{\underline{Minimax theorem} - By noting $\pi_A,\pi_B$ ranging over mixed strategies, for every simultaneous two-player zero-sum game with a finite number of actions, we have:}\par
+
+${\max_{\pi_A}\min_{\pi_B}V(\pi_A,\pi_B)=\min_{\pi_B}\max_{\pi_A}V(\pi_A,\pi_B)}$
+
+
+\underline{Non-zero-sum games}
+{\underline{Payoff matrix} - We define $V_p(\pi_A,\pi_B)$ to be the utility for player $p$.}\par
+
+{\tiny \underline{Nash equilibrium} - A Nash equilibrium is $(\pi_A^\star,\pi_B^\star)$ such that no player has an incentive to change its strategy. We have: ${\forall \pi_A, V_A(\pi_A^\star,\pi_B^\star)\geqslant V_A(\pi_A,\pi_B^\star)}$\\${\forall \pi_B, V_B(\pi_A^\star,\pi_B^\star)\geqslant V_B(\pi_A^\star,\pi_B)}$}
+
+
+%\vfill\null
+%\columnbreak
+
+{\color{magenta} \hrulefill}\\
+\AddToShipoutPicture*{\put(580,235){\rotatebox{90}{\scalebox{1}{\tiny {\color{magenta} CSP}}}}}
+
+ \AddToShipoutPicture*{\put(580,202){\rotatebox{90}{\scalebox{1}{\tiny {\color{magenta} Factor graphs}}}}}
+ {\tiny \underline{Definition} - A factor graph, also referred to as a Markov random field, is a set of variables $X=(X_1,...,X_n)$ where $X_i\in\textrm{Domain}_i$ and $m$ factors $f_1,...,f_m$ with each $f_j(X)\geqslant 0$.}\par
+ {\tiny \underline{Scope and arity} - The scope of a factor $f_j$ is the set of variables it depends on. The size of this set is called the arity.}\par
+ {\tiny \textit{Remark: factors of arity 1 and 2 are called unary and binary respectively.}}\par
+ {\tiny \underline{Assignment weight} - Each assignment $x=(x_1,...,x_n)$ yields a weight $\textrm{Weight}(x)$ defined as being the product of all factors $f_j$ applied to that assignment. Its expression is given by:}\par $\textrm{Weight}(x)=\prod_{j=1}^mf_j(x)$\\
+ {\tiny \underline{Constraint satisfaction problem} - A constraint satisfaction problem (CSP) is a factor graph where all factors are binary; we call them to be constraints: $\forall j\in[\![1,m]\!],\quad f_j(x)\in\{0,1\}$}\par
+ {Here, the constraint $j$ with assignment $x$ is said to be satisfied if and only if $f_j(x)=1$.}\par
+ {\tiny \underline{Consistent assignment} - An assignment $x$ of a CSP is said to be consistent if and only if $\textrm{Weight}(x)=1$, i.e. all constraints are satisfied.}\par
+
+{\color{magenta} \hrulefill}\\
+\AddToShipoutPicture*{\put(580,122){\rotatebox{90}{\scalebox{1}{\tiny {\color{magenta} Dynamic Ordering}}}}}
+ {\tiny \underline{Dependent factors} - The set of dependent factors of variable $X_i$ with partial assignment $x$ is called $D(x,X_i)$, and denotes the set of factors that link $X_i$ to already assigned variables.}\par
+ {\tiny \underline{Backtracking search} - Backtracking search is an algorithm used to find maximum weight assignments of a factor graph. At each step, it chooses an unassigned variable and explores its values by recursion. Dynamic ordering ( i.e. choice of variables and values) and lookahead ( i.e. early elimination of inconsistent options) can be used to explore the graph more efficiently, although the worst-case runtime stays exponential: $O(|\text{Domain}|^n)$.}\par
+ {\tiny \underline{Forward checking} - It is a one-step lookahead heuristic that preemptively removes inconsistent values from the domains of neighboring variables. It has the following characteristics:}\par
+ {$\cdot$ After assigning a variable $X_i$, it eliminates inconsistent values from the domains of all its neighbors.}\par
+ {$\cdot$ If any of these domains becomes empty, we stop the local backtracking search.}\par
+ {$\cdot$ If we un-assign a variable $X_i$, we have to restore the domain of its neighbors.}\par
+ {\tiny \underline{Most constrained variable} - It is a variable-level ordering heuristic that selects the next unassigned variable that has the fewest consistent values. This has the effect of making inconsistent assignments to fail earlier in the search, which enables more efficient pruning.}\par
+ {\tiny \underline{Least constrained value} - It is a value-level ordering heuristic that assigns the next value that yields the highest number of consistent values of neighboring variables. Intuitively, this procedure chooses first the values that are most likely to work.} \par
+ {\tiny \textit{Remark: in practice, this heuristic is useful when all factors are constraints.}}\par
+ \newpage
+
+ {\tiny \underline{Arc consistency} - We say that arc consistency of variable $X_l$ with respect to $X_k$ is enforced when for each $x_l \in \textrm{Domain}_l$:}\par
+ {$\cdot$ unary factors of $X_l$ are non-zero,}\par
+ {$\cdot$ there exists at least one $x_k \in \textrm{Domain}_k$ such that any factor between $X_l$ and $X_k$ is non-zero.}\par
+ {\tiny \underline{AC-3} - The AC-3 algorithm is a multi-step lookahead heuristic that applies forward checking to all relevant variables. After a given assignment, it performs forward checking and then successively enforces arc consistency with respect to the neighbors of variables for which the domain change during the process.}\par
+ {\tiny \textit{Remark: AC-3 can be implemented both iteratively and recursively.}}\par
+ 
+ {\color{magenta}\hrulefill}\\
+ \AddToShipoutPicture*{\put(30,485){\rotatebox{90}{\scalebox{1}{\tiny {\color{magenta} Approximate Methods}}}}}
+ {\tiny \underline{Beam search} - Beam search is an approximate algorithm that extends partial assignments of $n$ variables of branching factor $b=|\textrm{Domain}|$ by exploring the $K$ top paths at each step. The beam size $K \in \{1,...,b^n\}$ controls the tradeoff between efficiency and accuracy. This algorithm has a time complexity of $O(n \cdot Kb\log(Kb))$.}\par
+ {\tiny \textit{Remark: $K=1$ corresponds to greedy search whereas $K\rightarrow+\infty$ is equivalent to BFS tree search.}}\par
+ {\tiny \underline{Iterated conditional modes} - Iterated conditional modes (ICM) is an iterative approximate algorithm that modifies the assignment of a factor graph one variable at a time until convergence. At step $i$, we assign to $X_i$ the value $v$ that maximizes the product of all factors connected to that variable.}\par
+ {\tiny \textit{Remark:} ICM may get stuck in local minima.}\par
+ {\tiny \underline{Gibbs sampling} - Gibbs sampling is an iterative approximate method that modifies the assignment of a factor graph one variable at a time until convergence. At step $i$:}\par
+ {$\cdot$ we assign to each element $u \in \textrm{Domain}_i$ a weight $w(u)$ that is the product of all factors connected to that variable,}\par
+ {$\cdot$ we sample $v$ from the probability distribution induced by $w$ and assign it to $X_i$.}\par
+ {\tiny \textit{Remark: Gibbs sampling can be seen as the probabilistic counterpart of ICM. It has the advantage to be able to escape local minima in most cases.}}\par
+ {\color{magenta} \hrulefill}\\
+\AddToShipoutPicture*{\put(30,370){\rotatebox{90}{\scalebox{1}{\tiny {\color{magenta} Factor Graph Transformations}}}}}
+ {\tiny \underline{Independence} - Let $A,B$ be a partitioning of the variables $X$. We say that $A$ and $B$ are independent if there are no edges between $A$ and $B$ and we write: $A\perp\!\!\!\!\perp B$}\par
+ {\tiny \textit{Remark: independence is the key property that allows us to solve subproblems in parallel.}}\par
+ {\tiny \underline{Conditional independence} - We say that $A$ and $B$ are conditionally independent given $C$ if conditioning on $C$ produces a graph in which $A$ and $B$ are independent. In this case, it is written: $A\perp\!\!\!\!\perp B|C$}\par
+ {\tiny \underline{Conditioning} - Conditioning is a transformation aiming at making variables independent that breaks up a factor graph into smaller pieces that can be solved in parallel and can use backtracking. In order to condition on a variable $X_i=v$, we do as follows:}\par
+ {\tiny $\cdot$ Consider all factors $f_1,...,f_k$ that depend on $X_i$}\par
+ {\tiny $\cdot$ Remove $X_i$ and $f_1,...,f_k$}\par
+ {\tiny $\cdot$ Add $g_j(x)$ for $j \in \{1,...,k\}$ defined as:$g_j(x)=f_j(x\cup \{X_i:v\})$}\par
+ {\tiny \underline{Markov blanket} - Let $A\subseteq X$ be a subset of variables. We define $\textrm{MarkovBlanket}(A)$ to be the neighbors of $A$ that are not in $A$.}\par
+ \hspace{0.5cm}{\tiny \textit{\underline{Proposition}} - Let $C=\textrm{MarkovBlanket}(A)$ and $B=X\backslash(A\cup C)$. Then we have:}\par
+ \hspace{1cm}{\tiny $A \perp\!\!\!\!\perp B|C$}\par
+ {\tiny \underline{Elimination} - Elimination is a factor graph transformation that removes $X_i$ from the graph and solves a small subproblem conditioned on its Markov blanket as follows:}\par
+ {\tiny $\cdot$ Consider all factors $f_{i,1},...,f_{i,k}$ that depend on $X_i$}\par
+ {\tiny $\cdot$ Remove $X_i$ and $f_{i,1},...,f_{i,k}$}\par
+ {\tiny $\cdot$ Add $f_{\textrm{new},i}(x)$ defined as: $f_{\textrm{new},i}(x)=\max_{x_i}\prod_{l=1}^kf_{i,l}(x)$}\par
+ {\tiny \underline{Treewidth} - The treewidth of a factor graph is the maximum arity of any factor created by variable elimination with the best variable ordering. In other words, $\textrm{Treewidth} = \min_{\textrm{orderings}} \max_{i\in \{1,...,n\}} \textrm{arity}(f_{\textrm{new},i})$}\par
+ {\tiny \textit{Remark: finding the best variable ordering is a NP-hard problem.}}\par
+ {\color{magenta} \hrulefill}\\
+\AddToShipoutPicture*{\put(30,220){\rotatebox{90}{\scalebox{1}{\tiny {\color{magenta} Bayesian Networks}}}}}
+ {\tiny \underline{Explaining away} - Suppose causes $C_1$ and $C_2$ influence an effect $E$. Conditioning on the effect $E$ and on one of the causes (say $C_1$) changes the probability of the other cause (say $C_2$). In this case, we say that $C_1$ has explained away $C_2$.}\par
+ {\tiny \underline{Directed acyclic graph} - A directed acyclic graph (DAG) is a finite directed graph with no directed cycles.}\par
+ {\tiny \underline{Bayesian network} - A Bayesian network is a directed acyclic graph (DAG) that specifies a joint distribution over random variables $X=(X_1,...,X_n)$ as a product of local conditional distributions, one for each node:}\par
+ {\tiny $P(X_1=x_1,...,X_n=x_n)\triangleq\prod_{i=1}^np(x_i|x_{\textrm{Parents}(i)})$}\par
+ {\tiny \textit{Remark: Bayesian networks are factor graphs imbued with the language of probability.}}\par
+ {\tiny \underline{Locally normalized} - For each $x_{\textrm{Parents}(i)}$, all factors are local conditional distributions. Hence they have to satisfy: $\sum_{x_i}p(x_i|x_{\textrm{Parents}(i)})=1$}\par
+ {As a result, sub-Bayesian networks and conditional distributions are consistent.}\par
+ {\tiny \textit{Remark: local conditional distributions are the true conditional distributions.}}
+ {\tiny \underline{Marginalization} - The marginalization of a leaf node yields a Bayesian network without that node.}\par
+ {\color{magenta} \hrulefill}\\
+\AddToShipoutPicture*{\put(30,130){\rotatebox{90}{\scalebox{1}{\tiny {\color{magenta} Inference}}}}}
+ {\tiny \underline{General probabilistic inference strategy} - The strategy to compute the probability $P(Q | E=e)$ of query $Q$ given evidence $E=e$ is as follows:}\par
+ {\tiny \textrm{Step 1} : Remove variables that are not ancestors of the query $Q$ or the evidence $E$ by marginalization}\par
+ {\tiny \textrm{Step 2} : Convert Bayesian network to factor graph  \textrm{Step 3} : Condition on the evidence $E=e$}\par
+ {\tiny \textrm{Step 4} : Remove nodes disconnected from the query $Q$ by marginalization}\par
+ {\tiny \textrm{Step 5} : Run a probabilistic inference algorithm (manual, variable elimination, Gibbs sampling, particle filtering)}\par
+ {\tiny \underline{Forward-backward algorithm} - This algorithm computes the exact value of $P(H = h_k | E = e)$ (smoothing query) for any $k \in \{1, ..., L\}$ in the case of an HMM of size $L$. To do so, we proceed in 3 steps:}\par
+ {\tiny \textrm{Step 1} : for $i \in \{1,..., L\}$, compute \\$F_i(h_i) = \sum_{h_{i-1}} F_{i-1}(h_{i-1})p(h_{i}|h_{i-1})p(e_i|h_i)$}\par
+ {\tiny \textrm{Step 2} : for $i \in \{L,..., 1\}$, compute \\$B_i(h_i) = \sum_{h_{i+1}} B_{i+1}(h_{i+1})p(h_{i+1}|h_i)p(e_{i+1}|h_{i+1})$}\par
+ {\tiny \textrm{Step 3} : for $i \in \{1,...,L\}$, compute $S_i(h_i) = \frac{F_i(h_i)B_i(h_i)}{\sum_{h_i}F_i(h_i)B_i(h_i)}$}\par
+ {\tiny with the convention $F_0 = B_{L+1} = 1$. From this procedure and these notations, we get that
+ $P(H = h_k | E = e) = S_k(h_k)$}\par
+ 
+ \columnbreak
+ 
+ {\tiny \underline{Gibbs sampling} - This algorithm is an iterative approximate method that uses a small set of assignments (particles) to represent a large probability distribution. From a random assignment $x$, Gibbs sampling performs the following steps for $i\in \{1,...,n\}$ until convergence:}\par
+ {\tiny $\cdot$ For all $u \in \textrm{Domain}_i$, compute the weight $w(u)$ of assignment $x$ where $X_i = u$}\par
+ {\tiny $\cdot$ Sample $v$ from the probability distribution induced by $w$: $v \sim P(X_i = v | X_{-i} = x_{-i})$}\par
+ {\tiny $\cdot$ Set $X_i = v$}\par
+ {\tiny \textit{Remark: $X_{-i}$ denotes $X \backslash \{X_i\}$ and $x_{-i}$ represents the corresponding assignment.}}\par
+ {\tiny \underline{Particle filtering} - This algorithm approximates the posterior density of state variables given the evidence of observation variables by keeping track of $K$ particles at a time. Starting from a set of particles $C$ of size $K$, we run the following 3 steps iteratively:}\par
+ {\tiny \textrm{Step 1:} proposal - For each old particle $x_{t-1} \in C$, sample $x$ from the transition probability distribution $p(x | x_{t-1})$ and add $x$ to a set $C'$.}\par
+ {\tiny \textrm{Step 2:} weighting - Weigh each $x$ of the set $C'$ by $w(x)=p(e_t|x)$, where $e_t$ is the evidence observed at time $t$.}\par
+ {\tiny \textrm{Step 3:} resampling - Sample $K$ elements from the set $C'$ using the probability distribution induced by $w$ and store them in $C$: these are the current particles $x_t$.}\par
+ {\tiny \textit{Remark: a more expensive version of this algorithm also keeps track of past particles in the proposal step.}}\par
+ {\tiny \underline{Maximum likelihood} - If we don't know the local conditional distributions, we can learn them using maximum likelihood. $\max_\theta\prod_{x\in\mathcal{D}_{\textrm{train}}}p(X=x;\theta)$}\par
+ {\tiny \underline{Laplace smoothing} - For each distribution $d$ and partial assignment $(x_{\textrm{Parents}(i)},x_i)$, add $\lambda$ to $\textrm{count}_d(x_{\textrm{Parents}(i)},x_i)$, then normalize to get probability estimates.}\par
+ {\tiny \underline{Algorithm} - The Expectation-Maximization (EM) algorithm gives an efficient method at estimating the parameter $\theta$ through maximum likelihood estimation by repeatedly constructing a lower-bound on the likelihood (E-step) and optimizing that lower bound (M-step) as follows:}\par
+ {\tiny \textrm{E-step} : Evaluate the posterior probability $q(h)$ that each data point $e$ came from a particular cluster $h$ as follows: $q(h)=P(H=h|E=e;\theta)$}\par
+ {\tiny \textrm{M-step} : Use the posterior probabilities $q(h)$ as cluster specific weights on data points $e$ to determine $\theta$ through maximum likelihood.}\par 
+%\vfill\null
+%\columnbreak
+ {\color{yellow} \hrulefill}\\
+\AddToShipoutPicture*{\put(215,330){\rotatebox{90}{\scalebox{1}{\tiny {\color{yellow} Basics}}}}}
+ {\tiny \underline{Model} - A model $w$ denotes an assignment of binary weights to propositional symbols.}\par
+ {\tiny \textit{Example: the set of truth values $w = \{A:0, B:1, C:0\}$ is one possible model to the propositional symbols $A$, $B$ and $C$.}}\par
+ {\tiny \underline{Interpretation function} - The interpretation function $\mathcal{I}(f,w)$ outputs whether model $w$ satisfies formula $f$:}\par
+ {\tiny $\mathcal{I}(f,w)\in\{0,1\}$}\par
+ {\tiny \underline{Set of models} - $\mathcal{M}(f)$ denotes the set of models $w$ that satisfy formula $f$. Mathematically speaking, we define it as follows:$\mathcal{M}(f) = \{w\, |\, \mathcal{I}(f,w)=1\}$}\par
+  {\color{yellow} \hrulefill}\\
+\AddToShipoutPicture*{\put(215,250){\rotatebox{90}{\scalebox{1}{\tiny {\color{yellow} Knowledge Base}}}}}
+ {\tiny \underline{Definition} - The knowledge base $\textrm{KB}$ is the conjunction of all formulas that have been considemagenta so far. The set of models of the knowledge base is the intersection of the set of models that satisfy each formula. In other words:}\par
+ {\tiny $\mathcal{M}(\textrm{KB})=\bigcap_{f\in\textrm{KB}}\mathcal{M}(f)$}\par
+ {\tiny \underline{Probabilistic interpretation} - The probability that query $f$ is evaluated to $1$ can be seen as the proportion of models $w$ of the knowledge base $\textrm{KB}$ that satisfy $f$, i.e. :}\par
+ {\tiny $P(f\,|\,\textrm{KB})=\frac{\displaystyle\sum_{w\in\mathcal{M}(\textrm{KB})\cap\mathcal{M}(f)}P(W=w)}{\displaystyle\sum_{w\in\mathcal{M}(\textrm{KB})}P(W=w)}$}\par
+ {\tiny \underline{Satisfiability} - The knowledge base $\textrm{KB}$ is said to be satisfiable if at least one model $w$ satisfies all its constraints. In other words: $\textrm{KB satisfiable}\Longleftrightarrow\mathcal{M}(\textrm{KB})\neq\varnothing$}\par
+ {\tiny \textit{Remark:} $\mathcal{M}(\textrm{KB})$ denotes the set of models compatible with all the constraints of the knowledge base.}\par
+ %{\tiny \underline{Relation between formulas and knowledge base} - We define the following properties between the knowledge base $\textrm{KB}$ and a new formula $f$:}\par
+ %Name
+ %Mathematical formulation
+ %Illustration
+ %Notes
+ %$\textrm{KB}$ entails $f$
+ %$\mathcal{M}(\textrm{KB})\cap\mathcal{M}(f)=\mathcal{M}(\textrm{KB})$
+ %$\cdot$ $f$ does not bring any new information $\cdot$ Also written $\textrm{KB}\models f$
+ %$\textrm{KB}$ contradicts $f$
+ %$\mathcal{M}(\textrm{KB})\cap\mathcal{M}(f)=\varnothing$
+ %$\cdot$ No model satisfies the constraints after adding $f$ $\cdot$ Equivalent to $\textrm{KB}\models\neg f$
+ %$f$ contingent to $\textrm{KB}$
+ %$\mathcal{M}(\textrm{KB})\cap\mathcal{M}(f) \neq \varnothing$ and $\mathcal{M}(\textrm{KB})\cap\mathcal{M}(f)\neq\mathcal{M}(\textrm{KB})$
+ %$\cdot$ $f$ does not contradict $\textrm{KB}$ $\cdot$ $f$ adds a non-trivial amount of information to $\textrm{KB}$
+ {\tiny \underline{Model checking} - A model checking algorithm takes as input a knowledge base $\textrm{KB}$ and outputs whether it is satisfiable or not.}\par
+ {\tiny \textit{Remark: popular model checking algorithms include DPLL and WalkSat.}}\par
+ {\tiny \underline{Inference rule} - An inference rule of premises $f_1,...,f_k$ and conclusion $g$ is written: $\frac{f_1,...,f_k}{g}$}\par
+ {\tiny \underline{Forward inference algorithm} - From a set of inference rules $\textrm{Rules}$, this algorithm goes through all possible $f_1, ..., f_k$ and adds $g$ to the knowledge base $\textrm{KB}$ if a matching rule exists. This process is repeated until no more additions can be made to $\textrm{KB}$.}\par
+ {\tiny \underline{Derivation} - We say that $\textrm{KB}$ derives $f$ (written $\textrm{KB}\vdash f$) with rules $\textrm{Rules}$ if $f$ already is in $\textrm{KB}$ or gets added during the forward inference algorithm using the set of rules $\textrm{Rules}$.}\par
+ {\tiny \underline{Properties of inference rules} - A set of inference rules $\textrm{Rules}$ can have the following properties:}\par
+ {\tiny \textrm{Soundness:}
+ $\{f \, | \, \textrm{KB}\vdash f\}\subseteq\{f \, | \, \textrm{KB}\models f\}$}\par
+ {\tiny \textrm{Completeness:}
+ $\{f \, | \, \textrm{KB}\vdash f\}\supseteq\{f \, | \, \textrm{KB}\models f\}$}\par
+ {\color{yellow} \hrulefill}\\
+\AddToShipoutPicture*{\put(215,45){\rotatebox{90}{\scalebox{1}{\tiny {\color{yellow} Propositional Logic}}}}}
+ {\tiny \underline{Horn clause} - By noting $p_1,...,p_k$ and $q$ propositional symbols, a Horn clause has the form: $(p_1\wedge...\wedge p_k)\longrightarrow q$}\par
+ {\tiny \textit{Remark: when $q=\textrm{false}$, it is called a "goal clause", otherwise we denote it as a "definite clause".}}\par
+ {\tiny \underline{Modus ponens} - For propositional symbols $f_1,...,f_k$ and $p$, the modus ponens rule is written: $\frac{f_1,...,f_k,\quad (f_1\wedge...\wedge f_k)\longrightarrow p}{p}$}\par
+ 
+
+ \columnbreak
+ {\tiny \underline{Completeness} - Modus ponens is complete with respect to Horn clauses if we suppose that $\textrm{KB}$ contains only Horn clauses and $p$ is an entailed propositional symbol. Applying modus ponens will then derive $p$.}\par
+ {\tiny \underline{Conjunctive normal form} - A conjunctive normal form (CNF) formula is a conjunction of clauses, where each clause is a disjunction of atomic formulas.}\par
+ {\tiny \textit{Remark: in other words, CNFs are $\wedge$ of $\vee$.}}\par
+ {\tiny \underline{Equivalent representation} - Every formula in propositional logic can be written into an equivalent CNF formula. The table below presents general conversion properties:}\par
+ \begin{tabular}{c | c | c | c}
+ \hline
+ \multicolumn{2}{c}{Rule name}& Initial&Converted\\
+ \hline
+ \multirow{3}{*}{Eliminate}&\tiny $\leftrightarrow$&\tiny $f \leftrightarrow g$&\tiny $(f \rightarrow g) \wedge (g \rightarrow f)$\\
+ &\tiny $\rightarrow$&\tiny $f \rightarrow g$&\tiny $\neg f \vee g$\\
+ &\tiny $\neg\neg$&\tiny $\neg\neg f$&\tiny $f$\\
+ \hline
+ \multirow{3}{*}{Distribute}&\tiny $\neg$ over $\wedge$&\tiny $\neg(f \wedge g)$&\tiny $\neg f \vee \neg g$\\
+ &\tiny $\neg$ over $\vee$&\tiny $\neg(f \vee g)$&\tiny $\neg f\wedge \neg g$\\
+ &\tiny $\vee$ over $\wedge$&\tiny $f \vee (g \wedge h)$&\tiny $(f \vee g) \wedge (f \vee h)$\\
+ \hline
+ \end{tabular}\\
+ {\tiny Resolution rule - For propositional symbols $f_1,...,f_n$, and $g_1,...,g_m$ as well as $p$, the resolution rule is written: $\frac{f_1\vee...\vee f_n\vee p,\quad\neg p\vee g_1\vee...\vee g_m}{f_1\vee...\vee f_n\vee g_1\vee...\vee g_m}$}\par
+ {\tiny \textit{Remark: it can take exponential time to apply this rule, as each application generates a clause that has a subset of the propositional symbols.}}\par
+ {\tiny \underline{Resolution-based inference} - The resolution-based inference algorithm follows the following steps:}\par
+ {\textrm{Step 1} : Convert all formulas into CNF}\par
+ {\textrm{Step 2} : Repeatedly apply resolution rule}\par
+ {\textrm{Step 3} : Return unsatisfiable if and only if $\text{False}$ is derived}\par
+ {\color{yellow} \hrulefill}\\
+\AddToShipoutPicture*{\put(397,425){\rotatebox{90}{\scalebox{1}{\tiny {\color{yellow} First Order Logic}}}}}
+ {\tiny \underline{Model} - A model $w$ in first-order logic maps:}\par
+ {\tiny $\cdot$ constant symbols to objects}\par
+ {\tiny $\cdot$ predicate symbols to tuple of objects}\par
+ {\tiny \underline{Horn clause} - By noting $x_1,...,x_n$ variables and $a_1,...,a_k,b$ atomic formulas, the first-order logic version of a horn clause has the form: \\$\forall x_1,...,\forall x_n,\quad(a_1\wedge...\wedge a_k)\rightarrow b$}\par
+ {\tiny \underline{Substitution} - A substitution $\theta$ maps variables to terms and $\textrm{Subst}[\theta,f]$ denotes the result of substitution $\theta$ on $f$.}\par
+ {\tiny \underline{Unification} - Unification takes two formulas $f$ and $g$ and returns the most general substitution $\theta$ that makes them equal: $\textrm{Unify}[f,g]=\theta\quad\textrm{ s.t. }\quad \textrm{Subst}[\theta,f]=\textrm{Subst}[\theta,g]$}\par
+ {\tiny \textit{Note: $\textrm{Unify}[f,g]$ returns $\textrm{Fail}$ if no such $\theta$ exists.}}\par
+ {\tiny \underline{Modus ponens} - By noting $x_1,...,x_n$ variables, $a_1, ..., a_k$ and $a'_1,...,a'_k$ atomic formulas and by calling $\theta = \textrm{Unify}(a'_1\wedge ...\wedge a'_k, a_1\wedge ...\wedge a_k)$ the first-order logic version of modus ponens can be written: $\frac{a'_1,...,a'_k\quad\forall x_1,...,\forall x_n (a_1\wedge...\wedge a_k)\rightarrow b}{\textrm{Subst}[\theta, b]}$}\par
+ {\tiny \underline{Completeness} - Modus ponens is complete for first-order logic with only Horn clauses.}\par
+ {\tiny \underline{Resolution rule} - By noting $f_1, ..., f_n$, $g_1, ..., g_m$, $p$, $q$ formulas and by calling $\theta=\textrm{Unify}(p,q)$, the first-order logic version of the resolution rule can be written:}\par
+ {$\frac{f_1\vee...\vee f_n\vee p,\quad\neg q\vee g_1\vee...\vee g_m}{\textrm{Subst}[\theta,f_1\vee...\vee f_n\vee g_1\vee...\vee g_m]}$}\par
+ {\tiny \underline{Semi-decidability} - First-order logic, even restricted to only Horn clauses, is semi-decidable.}\par
+ {\tiny if $\textrm{KB}\models f$, forward inference on complete inference rules will prove $f$ in finite time}\par
+ {\tiny if $\textrm{KB}\not\models f$, no algorithm can show this in finite time}\par
+ 
+ {\color{purple} \hrulefill}\\
+\AddToShipoutPicture*{\put(397,295){\rotatebox{90}{\scalebox{1}{\tiny {\color{purple} Farmer Kim}}}}}
+{\tiny Farmer Kim wants to install a set of sprinklers to water all his crops in the most cost effective manner and has hired you as a consultant. Specifically, he has a rectangular plot of land, which is broken into W × H cells. For each cell $(i, j)$, let $C_{i,j} \in {0, 1}$ denote whether there are crops in that cell that need watering. In each cell $(i, j)$, he can either install $(X_{i,j} = 1)$ or not install $(X_{i,j} = 0)$ a sprinkler. Each sprinkler has a range of R, which means that any cell within Manhattan distance of R gets watered. The maintenance cost of the sprinklers is the sum of the Manhattan distances from each sprinkler to his home located at $(1, 1)$. Recall that the Manhattan distance between $(a_1, b_1)$ and $(a_2, b_2)$ is $|a_1 −a_2|+|b_1 −b_2|$. Naturally, Farmer Kim wants the maintenance cost to be as small as possible given that all crops are watered.}\par
+{\tiny Farmer Kim actually took CS221 years ago, and remembered a few things. He says: “I
+think this should be formulated as a factor graph. The variables should be $X_{i,j} \in {0, 1}$ for
+each cell $(i, j)$. But here’s where my memory gets foggy. What should the factors be?”
+Let $X = {X_{i,j}}$ denote a full assignment to all variables $X_{i,j}$ . Your job is to define two
+types of factors:
+$\tiny \cdot f_{i,j}$ : ensures any crops in (i, j) are watered,
+$\tiny \cdot f_{\text{cost}}$: encodes the maintenance cost,
+so that a maximum weight assignment corresponds to a valid sprinkler installation with
+minimum maintenance cost.}\par
+{\tiny \color{purple}Solution:} For each cell $(i, j)$, let $f_{i,j}$ encode whether the crops (if they exist) in $(i, j)$ are
+watered:
+\vspace*{-0.05cm}
+\[\tiny f_i,j (X) = \big[C_{i,j} = 0\; \text{or}\; \displaystyle\min_{i',j':X_{i',j'}=1}|i'-i|+|j'-j|\le R\big]\]
+{We define the next factor to the exponentiated negative minimum cost, so that
+the factor is non-negative and that maximizing the weight corresponds to minimizing the
+maintenance cost:}\par
+\vspace{-0.10cm}$$f_{\text{cost}}(X) = \exp\Big(-\displaystyle\sum_{i',j':X_{i',j'}=1}|i'-1|+|j'-1|\Big)$$
+ 
+ {\color{purple} \hrulefill}\\
+\AddToShipoutPicture*{\put(397,140){\rotatebox{90}{\scalebox{1}{\tiny {\color{purple} Rafting}}}}}
+
+{\tiny You are going on a rafting trip! The river is modeled as a grid of positions $(x, y)$, where
+$x \in {−m, −(m − 1), \hdots , 0, \hdots ,(m − 1), m}$ represents the horizontal offset from the middle
+of the river and $y \in {0, \hdots , n}$ is how far down the river you are. To make things more
+challenging, there are a number of rocks in the river: For each position $(x, y)$, let $R(x, y) = 1$
+if there is a rock and $0$ otherwise. You can assume that the start and end positions do not
+have rocks.}\par
+{\tiny Here’s how you can control the raft. From any position $(x, y)$, you can:}\par
+{\tiny $\cdot$ go straight down to $(x, y + 1)$ (which takes 1 second),}\par
+{\tiny $\cdot$ veer left to $(x − 1, y + 1)$ (which takes 2 seconds), or}\par
+{\tiny $\cdot$ veer right to $(x + 1, y + 1)$ (which takes 2 seconds).}\par
+{\tiny If the raft enters a position with a rock, there is an extra 5 second delay. The raft starts in
+$(0, 0)$ and you want to end up in any position $(x, y)$ where $y = n$.}\par
+
+{\tiny {\color{purple}{DP Solution:}} At each point in time, you can take an action a ∈ {−1, 0, +1}, which has cost $|a|+1$ (just a succinct way of representing the cost). In addition, you incur an extra $5R(x, y)$ for hitting a rock. The full recurrence is:}\par
+\vspace{-0.05cm}\[\tiny C(x, y) = 5R(x, y) + \]\[\begin{cases}
+0 & \text{if }y = n,\\
+\displaystyle\min_{a\in{−1,0,+1}}(|a| + 1 + C((x + a, y + 1))) &\text{otherwise}.\end{cases}\]
+%\vfill\null
+%\columnbreak
+
+{\tiny {\color{purple}{MDP:}} First, let us figure out what the state should be. At position $(x, y)$, you have knowledge about each $R(x', y')$ for all $x', y'$ for which $y' ≤ y + 1$ and for all $x'$. This is a lot of information to remember (exponential in $mn$). The key is that the only relevant bits of information are $R(x', y')$ for the positions that you might move to, of which there are 3. \tiny Let $s = (x, y, r_{−1}, r_0, r_1)$, where $r_a$ denotes whether position $(x + a, y + 1)$ has a rock or not. \tiny Thus, there are only $2^3mn$ possible states that you can be in at any given time.}\par
+{$\cdot s_{\text{start}} = (0, 0, 0, 0, 0)$}\par
+{$\cdot$ Actions($s$) = $\{a \in {−1, 0, +1}$ : a keeps you on the grid\}}\par
+{$\cdot$ T($s, a, s') = \alpha^k(1 − \alpha)^{3−k}$ if $x' = x + a, y' = y + 1$ and $0$ otherwise, where we define $k = r'_{−1} + r'_0 + r'_1$ to be the number of rocks that will appear next.}\par
+{$\cdot$  Reward($s, a, s'$) = $−[(|a|+1)+5r_a]$, where the first term is the cost of taking the action and the second term is the cost (0 or 1) of hitting a rock.}\par
+{$\cdot$ IsEnd($s$) = $[y = n]$}\par
+{$\cdot \gamma = 1$}\par
+\hrulefill\\
+{\tiny As before, assume that you don’t have the map describing the position of the rocks, but
+you know that the probability distribution over the map is $R(x, y) = 1$ independently with
+probability $\alpha$.}\par
+{\tiny Consider the following two scenarios:}\par
+{\tiny $\cdot$ A genie reveals the entire map to you right as you get on your raft. Let
+$T_1$ be this expected minimum time of getting to an end goal.}\par
+{\tiny $\cdot$ There is sadly no genie, and you have to use your own eyes to look at the position of
+the next row as you’re rafting. Let T2 be this minimum expected time of getting to an end goal.}\par
+{\tiny Prove that $T1 \le T2$. (Intuitively this should be true; you must argue it mathematically.)}\par
+{\tiny {\color{purple} Proof Solution} First, note that $\sum_a p(a)\min_b F(a, b) \le \min_b p(a)F(a, b)$, because in the first case you get $a$ different $b$ for each $a$ and in the second, you don’t. Let $R_1, \hdots , R_n$ be the rows of $R$, and let $a_1, \hdots , a_n$ be the $n$ actions that you take to get from row $0$ to row $n$.}\par
+{\tiny Let $C(R_1, \hdots , R_n, a_1, \hdots , a_n)$ be the cost of your journey, and let $p(R_y)$ be the probability of having a particular configuration of rocks in row $y$. In the first case, we are computing an expectation over a minimum:}\par
+\hspace{-0.25cm}{$\tiny \sum_{R_1,\hdots,R_n}p(R_1)\hdots p(R_n)\min_{a_1,..,a_n} C(R_1,.., R_n, a_1,.., a_n).$}\par
+{\tiny In the second case, we are interleaving the minimum with the expectation:}\par
+\hspace{-0.10cm}{$\tiny \sum_{R_1}p(R_1)\min_{a_1}..\sum_{R_n}p(R_n)\min_{a_n}C(R_1,.., R_n, a_1,.., a_n).$}\par
+{\tiny Having all the mins on the inside can only make the expected time smaller. In other words,
+going second in a game is always preferable.} \par
+
+\hrulefill\\
+{\tiny Suppose we don’t actually know how long it takes to go over rocks or what the distribution
+of rocks is, so we will use Q-learning to learn a good policy.}\par
+{\tiny $\cdot$  Suppose the state s includes the position $(x, y)$ and the map that’s revealed so far, i.e. $R(x', y')$ for all $x'$ and $y' \le y + 1.$}\par
+{\tiny $\cdot$  The actions are $a \in {−1, 0, +1}$, corresponding to going left, straight, or right.}\par
+{\tiny $\cdot$  The reward is the negative time it takes to travel from state s to the new state $s'$.}\par
+{\tiny $\cdot$  Assume the discount $\gamma = 1.$}\par
+{\tiny For each state $s$ and action $a$, let $H(s, a) = 1$ if a causes the raft to hit a rock and 0
+otherwise. Now define the approximate Q-function to be:}\par
+{\tiny $Q(s, a; \alpha, \beta) = \alpha H(s, a) + \beta,$}\par
+{\tiny where $\alpha$ and $\beta$ are parameters to be learned. Suppose we sample once from an exploration policy, which led to the trajectory shown in Figure 1.}\par
+{\tiny (i) Write down the Q-learning updates on $\alpha$ on experience $(s, a, r, s')$ using a step size $\eta$.}\par
+{\tiny {\color{purple}Solution} For updating $\alpha$:}\par
+{\tiny $\alpha ← \alpha − \eta[(\alpha H(s, a) + \beta) − (r + \gamma \max_{a'}(\alpha H(s', a') + \beta))]H(s, a)$}\par
+{\tiny $= \alpha − \eta[\alpha H(s, a) − (r + max_{a'}\alpha H(s', a')]H(s, a).$}\par
+{\tiny For updating $\beta$:}\par
+{\tiny $\beta ← \beta − \eta[(\alpha H(s, a) + \beta) − (r + \gamma max_{a'}(\alpha H(s', a') + \beta))]$}\par
+{\tiny $= \beta − \eta[\alpha H(s, a) − (r + max_{a'}\alpha H(s', a')].$}\par
+{\tiny (ii) On how many of the $n = 10$ updates could $\alpha$ change its value?}\par
+{{\color{purple} Updates Solution} The paramater $\alpha$ is updated only when $H(s, a) = 1$, which means that we hit a rock. This happens twice.}\par
+
+{\color{purple}\hrulefill}\par
+{$\cdot$ Each other car’s policy chooses the action a that minimizes its immediate
+cost (not your cost) plus the distance from xi + a to (W, H). Any ties are broken
+randomly.}\par
+{{\color{purple}Solution} The greedy policy is a known stochastic policy. Due to the randomness,
+it is not a search problem, but can be cast as an MDP. The default algorithm for
+computing optimal policies is value iteration. But because the MDP is acyclic, we
+could also compute this using a recursive dynamic programming.}\par
+{$\cdot$ Each other car’s policy uses the learned policy produced from part (d).}\par
+{{\color{purple}Solution} This is again a known stochastic policy (the fact that it was learned is
+irrelevant), so the answer is the same as for the greedy policy.}
+{$\cdot$ Each other car’s policy is optimally minimizing your cost (which might be
+the case if you had a siren on your car).}\par
+{{\color{purple}Solution} All cars are now trying to minimize your cost, so this is a search problem. Which can be solved using UCS or A* (all costs are non-negative), or dynamic
+programming (since the state graph is acyclic).}\par
+{$\cdot$ Each other car’s policy is optimally maximizing your cost.}\par
+{{\color{purple}Solution} This is a classic turn-based zero-sum game (very similar to Pac-Man with
+cars instead of ghosts). We would compute the recurrence using dynamic programming.}\par
+{$\cdot$ Each other car’s policy is trying to minimize its own cost.}\par
+{{\color{purple}Solution} This is a turn-based non-zero-sum game. These games in general don’t
+have optimal policies, but merely Nash equilibria. How to compute them is outside
+the scope of this class.}\par
+{\color{purple}\hrulefill}\par
+{$\cdot$ To decrease training error, would you want more or less data?}\par
+{{\color{purple}Solution} Less. Fewer data points are easier to fit.}\par
+{$\cdot$ To decrease training error, would you want to add or remove features?}\par
+{{\color{purple}Solution} Add. More features makes it easier to fit the data.}\par
+{$\cdot$ To decrease training error, would you want to make the set of hypotheses
+smaller or larger?}\par
+{{\color{purple}Solution} Larger. More hypotheses makes it easier to fit the data.}\par
+{\color{purple}\hrulefill}\par
+{\tiny Define the linear predictor (parametrized by numbers $w, b$) to be
+$f(x) = sign(wx + b)$ with the associated zero-one loss and hinge loss, respectively:}\par
+{\tiny $Loss_{0-1}(x, y, w, b) = 1[f(x) \ne y]$,}\par
+{\tiny $Loss_{\text{hinge}}(x, y, w, b) = \max(0, 1 − y(wx + b))$.}\par
+{Define the total training zero-one and hinge losses as the following:}\par
+{\tiny TrainLoss$_{0-1}(w, b) = \displaystyle\sum_{(x,y)\in D_{\text{train}}}Loss_{0-1}(x, y, w, b),$}\par
+{\tiny TrainLoss$_{\text{hinge}}(w, b) = \displaystyle\sum_{(x,y)\in D_{\text{train}}}Loss_{\text{hinge}}(x, y, w, b).$}\par
+{{\color{purple}Solution }The derivative of the max is an indicator function and then we use the chain rule and calculate the derivative of the argument.}\par
+{\tiny ${\partial\text{TL}_{\text{hinge}}(w, b)}/{\partial w} =\displaystyle\sum_{(x,y)\in D_{\text{train}}}1[1 − y(wx + b) > 0](−yx)$}\par
+{\tiny ${\partial\text{TL}_{\text{hinge}}(w, b)}/{\partial b} =\displaystyle\sum_{(x,y)\in D_{\text{train}}}1[1 − y(wx + b) > 0](−y)$}\par
+\end{multicols*}
+\end{document}
